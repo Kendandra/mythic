@@ -1,4 +1,6 @@
 import React, { ReactElement, ReactSVGElement, useState } from "react"
+import styles from './celestial.module.css'
+
 import ADJ_Big from '../images/celestial/ADJ_Big.svg'
 import ADJ_Both from '../images/celestial/ADJ_Both.svg'
 import ADJ_Destroy from '../images/celestial/ADJ_Destroy.svg'
@@ -12,7 +14,7 @@ import LINK_Underbar from '../images/celestial/LINK_Underbar.svg'
 import LINK_Verticalbar from '../images/celestial/LINK_Verticalbar.svg'
 import MOD_Of from '../images/celestial/MOD_Of.svg'
 import MOD_Question from '../images/celestial/MOD_Question.svg'
-import MOD_With from '../images/celestial/MOD_With.svg'
+import MOD_From from '../images/celestial/MOD_From.svg'
 import NOUN_Air from '../images/celestial/NOUN_Air.svg'
 import NOUN_Down from '../images/celestial/NOUN_Down.svg'
 import NOUN_Earth from '../images/celestial/NOUN_Earth.svg'
@@ -22,6 +24,7 @@ import NOUN_Light from '../images/celestial/NOUN_Light.svg'
 import NOUN_Spirit from '../images/celestial/NOUN_Spirit.svg'
 import NOUN_Start from '../images/celestial/NOUN_Start.svg'
 import NOUN_Stop from '../images/celestial/NOUN_Stop.svg'
+import NOUN_Story from '../images/celestial/NOUN_Story.svg'
 import NOUN_Up from '../images/celestial/NOUN_Up.svg'
 import NOUN_Voice from '../images/celestial/NOUN_Voice.svg'
 import NOUN_Water from '../images/celestial/NOUN_Water.svg'
@@ -34,12 +37,15 @@ interface CelestialSentenceProperties {
 interface ComplexGlyph {
   name: string;
   glyph?: ReactElement;
+  baseGlyphNumber?: number;
+  narrowWidthGlyphNumber?: number;
 }
 
 
 function CelestialSentence(props: CelestialSentenceProperties) {
  
   const minGlpyhWidth = props.minGlyphWidth ?? 40;
+  const narrowWidthGlyphInPx = 5;
 
   function getWidthPx(shrinkFactor: number = 1) : number {
     let shrinkRate = 1
@@ -82,27 +88,56 @@ function CelestialSentence(props: CelestialSentenceProperties) {
   function toPremadeGlyph(source: string, shrinkFactor: number = 0) : ComplexGlyph {
     source = source.toLocaleLowerCase();
 
-    const bigSpirit = toComlexGlyphs([{name: 'spirit'}], [{name: 'big'}], true, shrinkFactor+1);
+    if(source.includes('-') || source.includes('/')) {
+      const parts: string[] = source.split('/');
+      const words: string = parts[0] ?? "";
+      const modifiers = parts[1] ?? "";
+      const wordGlyphs: ComplexGlyph[] = words.split('-').filter(s => s !== "").map<ComplexGlyph>((s, i) => (toPremadeGlyph(s, shrinkFactor)));
+      const modifierGlyphs: ComplexGlyph[] = modifiers.split('-').filter(m => m !== "").map<ComplexGlyph>((m, i) => (toPremadeGlyph(m, shrinkFactor)));
 
+      return toComlexGlyphs(
+        wordGlyphs, 
+        modifierGlyphs, 
+        true, 
+        shrinkFactor)
+    }
+
+    const useUnderbar = !source.includes('*');
+    source = source.replace('*', '');
+
+    // Common compound glyphs
+    const bigSpirit = toComlexGlyphs([{name: 'spirit'}], [{name: 'big'}], true, shrinkFactor+1);
+    const link = {name: '|', baseGlyphNumber: 0, narrowWidthGlyphNumber: 1}
+    
+    // Translate to (possibly) nested glyphs
     switch(source) {
+      case 'from|': return toComlexGlyphs([{name: 'from'}, link], [], useUnderbar, shrinkFactor);
+      case '|from': return toComlexGlyphs([link, {name: 'from'}], [], useUnderbar, shrinkFactor);
+      case 'of|': return toComlexGlyphs([{name: 'of'}, link], [], useUnderbar, shrinkFactor);
+      case '|of': return toComlexGlyphs([link, {name: 'of'}], [], useUnderbar, shrinkFactor);
+      case 'tell':
+      case 'speak':
       case 'say': return toComlexGlyphs([{name: 'voice'}], [], false, shrinkFactor);
-      case 'open': return toComlexGlyphs([{name: 'gate'}], [{name: 'make'}], true, shrinkFactor);
-      case 'close': return toComlexGlyphs([{name: 'gate'}], [{name: 'destory'}], true, shrinkFactor);
-      case 'goddes':
-      case 'god': return toComlexGlyphs([{name: 'of'}, {name: '|'}, bigSpirit], [], true, shrinkFactor);
-      case 'person': return toComlexGlyphs([{name: 'of'}, {name: '|'}, {name: 'spirit'}], [], true, shrinkFactor);
+      case 'open': return toComlexGlyphs([{name: 'gate'}], [{name: 'make'}], useUnderbar, shrinkFactor);
+      case 'close': return toComlexGlyphs([{name: 'gate'}], [{name: 'destory'}], useUnderbar, shrinkFactor);
+      case 'goddess':
+      case 'god': return toComlexGlyphs([{name: 'from'}, link, bigSpirit], [], useUnderbar, shrinkFactor);
+      case 'person': return toComlexGlyphs([{name: 'from'}, link, {name: 'spirit'}], [], useUnderbar, shrinkFactor);
       case 'me':
       case 'i': 
-        return toComlexGlyphs([{name: 'of'}, {name: '|'}, {name: 'spirit'}], [{name: "this"}], true, shrinkFactor);
+        return toComlexGlyphs([{name: 'from'}, link, {name: 'spirit'}], [{name: "this"}], useUnderbar, shrinkFactor);
       case 'them':
       case 'you': 
-        return toComlexGlyphs([{name: 'of'}, {name: '|'}, {name: 'spirit'}], [{name: "that"}], true, shrinkFactor);
-      case 'we': return toComlexGlyphs([{name: 'of'}, {name: '|'}, {name: 'spirit'}], [{name: "both"}], true, shrinkFactor);
+        return toComlexGlyphs([{name: 'from'}, link, {name: 'spirit'}], [{name: "that"}], useUnderbar, shrinkFactor);
+      case 'we': return toComlexGlyphs([{name: 'from'}, link, {name: 'spirit'}], [{name: "both"}], useUnderbar, shrinkFactor);
       case 'and':
       case 'yes': return toComlexGlyphs([{name: 'yes'}], [], false, shrinkFactor);
       case 'makes': return toComlexGlyphs([{name: 'make'}], [], false, shrinkFactor);
       case '?': return toComlexGlyphs([{name: '?'}], [], false, shrinkFactor);
-      default: return toComlexGlyphs([{name: source}], [], true, shrinkFactor);
+      default: 
+        // Attempt to break up
+
+        return toComlexGlyphs([{name: source}], [], useUnderbar, shrinkFactor);
     }
   }
 
@@ -131,7 +166,7 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'of': return <MOD_Of height={scale} width={scale}/>;
       case '?':
       case 'question': return <MOD_Question height={scale} width={scale}/>;
-      case 'with': return <MOD_With height={scale} width={scale}/>;
+      case 'from': return <MOD_From height={scale} width={scale}/>;
       case 'air': return <NOUN_Air height={scale} width={scale}/>;
       case 'down': return <NOUN_Down height={scale} width={scale}/>;
       case 'earth': return <NOUN_Earth height={scale} width={scale}/>;
@@ -143,13 +178,17 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'go':
       case 'start': return <NOUN_Start height={scale} width={scale}/>;
       case 'stop': return <NOUN_Stop height={scale} width={scale}/>;
+      case 'tale':
+      case 'story': return <NOUN_Story height={scale} width={scale}/>;
       case 'up': return <NOUN_Up height={scale} width={scale}/>;
+      case 'sound':
       case 'voice': return <NOUN_Voice height={scale} width={scale}/>;
       case 'water': return <NOUN_Water height={scale} width={scale}/>;
 
-      case '_': return <LINK_Underbar preserveAspectRatio="none" height="5px" width={"90%"}/>;
-      case '|': return <LINK_Verticalbar style={{marginBottom:`${minGlpyhWidth * -0.5}px`}} preserveAspectRatio="none" height={scale} width={"5px"}/>;
+      case '_': return <LINK_Underbar preserveAspectRatio="none" height="5px" width={"95%"}/>;
+      case '|': return <LINK_Verticalbar style={{marginBottom:`${minGlpyhWidth * -0.15}px`}} preserveAspectRatio="none" height={scale} width={"5px"}/>;
 
+      // Otherwise return a RED glyph that says "not found"
       default: return <ADJ_No width={scale} height={`${getWidthPx(shrinkFactor-1)}px`} stoke="red" fill="red"/>
     }
   }
@@ -157,35 +196,63 @@ function CelestialSentence(props: CelestialSentenceProperties) {
   function toComlexGlyphs(words: ComplexGlyph[], modifiers: ComplexGlyph[], underbar: boolean = true, shrinkFactor: number = 0) : ComplexGlyph {
 
     let scaleFactor = getWidthPx(shrinkFactor);
-    let horizontalGlyphNumber = Math.max(words?.length ?? 1, modifiers?.length ?? 1);
+    let horizontalGlyphNumber = Math.max(
+      words.map(w => w.baseGlyphNumber ?? 1).reduce((count, w) => (count+w), 0) ?? 1, 
+      modifiers.map(m => m.baseGlyphNumber ?? 1).reduce((count, m) => (count+m), 0) ?? 1);
+    let narrowWidthGlyphNumber = Math.max(
+      words.map(w => w.narrowWidthGlyphNumber ?? 0).reduce((count, w) => (count+w), 0) ?? 1, 
+      modifiers.map(m => m.narrowWidthGlyphNumber ?? 0).reduce((count, m) => (count+m), 0) ?? 1);
 
     function getStyleOverride(glyph: ComplexGlyph) : React.CSSProperties {
       switch(glyph.name) {
-        case '|': return {alignSelf: 'center', marginBottom: `${-scaleFactor/2}px`};
+        case '|': return {alignSelf: 'center'};
         default: return {alignSelf: "flex-end"};
       }
     }
 
-    return {name: `(${words.map(w => w.name).join(' ')}${underbar ? '_' : ''}(${modifiers.map(m => m.name).join('-')})`, 
-    glyph: ( 
-      <div style={{width: `${scaleFactor * horizontalGlyphNumber}px`, display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap"}}>
-      {words.map((e, i) => <div key={i} style={getStyleOverride(e)}>{toGlyph(e, shrinkFactor+1)}</div>)}
+    return {name: `(${words?.map(w => w.name).join(' ')}${underbar ? '_' : ''}(${modifiers?.map(m => m.name).join('-')})`, 
+      glyph: ( 
+        <div key={`${words.map(w => w.name).join(' ')} / ${modifiers.map(w => w.name).join(' ')}`}
+          className={styles.glyph}
+          title={`${horizontalGlyphNumber}|${narrowWidthGlyphNumber}-${shrinkFactor} ${words.map(w => w.name).join(' ')} / ${modifiers.map(w => w.name).join(' ')}`} 
+          style={{width: `${(scaleFactor * horizontalGlyphNumber) + (narrowWidthGlyphNumber * narrowWidthGlyphInPx)}px`, display: "flex", alignItems: "center", justifyContent: "center", flexWrap: "wrap"}}>
+          {words.map((e, i) => <div key={i} style={getStyleOverride(e)}>{toGlyph(e, shrinkFactor+1)}</div>)}
 
-      {underbar && <>
-        <div style={{flexBasis: "100%", height: "0"}}>{/* forces new line */}</div>
-        <div style={{margin: "-5px;", alignSelf: "flex-start", width: "100%"}}>{toGlyph({name: '_'}, shrinkFactor+1)}</div>
+          {underbar && <>
+            <div style={{flexBasis: "100%", height: "0"}}>{/* forces new line */}</div>
+            <div style={{margin: `${-0.15*scaleFactor}px`, alignSelf: "flex-start", width: "100%"}}>{toGlyph({name: '_'}, shrinkFactor+1)}</div>
+          </>}
 
-        {modifiers?.length > 0 && modifiers.map((e, i) => <div key={i} style={{}}>{toGlyph(e, shrinkFactor+1)}</div>)}
-      </>}
+          {modifiers?.length > 0 && modifiers.map((e, i) => <div key={i} style={{}}>{toGlyph(e, shrinkFactor+1)}</div>)}
 
-    </div>)}
+        </div>),
+      baseGlyphNumber: horizontalGlyphNumber,
+      narrowWidthGlyphNumber: narrowWidthGlyphNumber
+      }
   }
 
-  function parseToGlyphs(str: string) : ReactElement[] {
-    const words = str.split(' ');
+  function parseToGlyphs(str: string, nestLevel: number = 0) : ReactElement[] {
+   
+    let mode: string;
+    switch (nestLevel) {
+      case 1: 
+        mode = ' ';
+        break;
+      case 2:
+        mode = '-';
+        break;
+      case 3:
+        mode = '/'
+        break;
+      default:
+        mode = ' ';
+        break;
+    }
 
-    // convert all words to glyphs if possible
-    return words.map(w => toPremadeGlyph(w).glyph)
+    //console.log(`Parsing '${str}' with level ${nestLevel}, mode: '${mode}'`);
+
+    let words: string[] = str.split(mode);
+    return words.flatMap((w, i) => <React.Fragment key={`${w}-${i}`}>{toPremadeGlyph(w, nestLevel).glyph}</React.Fragment>);
   }
 
   return (

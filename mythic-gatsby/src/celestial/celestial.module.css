@@ -1,0 +1,5 @@
+.glyph div:hover svg path,
+.glyph div:hover {
+  fill: rgb(77, 196, 243);
+  stroke: rgb(111, 207, 245);
+}
