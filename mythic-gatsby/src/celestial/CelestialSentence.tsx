@@ -28,6 +28,27 @@ import NOUN_Story from '../images/celestial/NOUN_Story.svg'
 import NOUN_Up from '../images/celestial/NOUN_Up.svg'
 import NOUN_Voice from '../images/celestial/NOUN_Voice.svg'
 import NOUN_Water from '../images/celestial/NOUN_Water.svg'
+import NOUN_Bird from '../images/celestial/NOUN_Bird.svg'
+import NOUN_Crimson from '../images/celestial/NOUN_Crimson.svg'
+import NOUN_Death from '../images/celestial/NOUN_Death.svg'
+import NOUN_Fall from '../images/celestial/NOUN_Fall.svg'
+import NOUN_Future from '../images/celestial/NOUN_Future.svg'
+import NOUN_Hammer from '../images/celestial/NOUN_Hammer.svg'
+import NOUN_House from '../images/celestial/NOUN_House.svg'
+import NOUN_Eye from '../images/celestial/NOUN_Eye.svg'
+import NOUN_Jail from '../images/celestial/NOUN_Jail.svg'
+import NOUN_Magic from '../images/celestial/NOUN_Magic.svg'
+import NOUN_Meet from '../images/celestial/NOUN_Meet.svg'
+import NOUN_Now from '../images/celestial/NOUN_Now.svg'
+import NOUN_Past from '../images/celestial/NOUN_Past.svg'
+import NOUN_Rise from '../images/celestial/NOUN_Rise.svg'
+import NOUN_Shape from '../images/celestial/NOUN_Shape.svg'
+import NOUN_Sun from '../images/celestial/NOUN_Sun.svg'
+import NOUN_Surprise from '../images/celestial/NOUN_Surprise.svg'
+import NOUN_Sword from '../images/celestial/NOUN_Sword.svg'
+import NOUN_Time from '../images/celestial/NOUN_Time.svg'
+import NOUN_Tree from '../images/celestial/NOUN_Tree.svg'
+
 import NUM_Zero from '../images/celestial/NUM_Zero.svg'
 import NUM_One from '../images/celestial/NUM_One.svg'
 import NUM_Two from '../images/celestial/NUM_Two.svg'
@@ -137,6 +158,7 @@ function CelestialSentence(props: CelestialSentenceProperties) {
     // Common compound glyphs
     const bigSpirit = toComlexGlyphs([{name: 'spirit'}], [{name: 'big'}], true, shrinkFactor+1);
     const bigEarth = toComlexGlyphs([{name: 'earth'}], [{name: 'big'}], true, shrinkFactor+1);
+    const closed = toComlexGlyphs([{name: 'gate'}], [{name: 'destroy'}], useUnderbar, shrinkFactor+1);
     const link = {name: '|', baseGlyphNumber: 0, narrowWidthGlyphNumber: 1}
     
     // Translate to (possibly) nested glyphs
@@ -148,11 +170,17 @@ function CelestialSentence(props: CelestialSentenceProperties) {
 
       case 'mountain': return toComlexGlyphs([{name: 'from'}, link, bigEarth], [], useUnderbar, shrinkFactor);
 
+      case 'sleep': return toComlexGlyphs([{name: 'eye'}], [closed], useUnderbar, shrinkFactor);
+
+      case 'meet|':
+      case 'upon':
+      case 'on': return toComlexGlyphs([{name:'meet'}, link], [], useUnderbar, shrinkFactor);
+
       case 'tell':
       case 'speak':
       case 'say': return toComlexGlyphs([{name: 'voice'}], [], false, shrinkFactor);
       case 'open': return toComlexGlyphs([{name: 'gate'}], [{name: 'make'}], useUnderbar, shrinkFactor);
-      case 'close': return toComlexGlyphs([{name: 'gate'}], [{name: 'destory'}], useUnderbar, shrinkFactor);
+      case 'close': return toComlexGlyphs([{name: 'gate'}], [{name: 'destroy'}], useUnderbar, shrinkFactor);
       case 'goddess':
       case 'god': return toComlexGlyphs([{name: 'from'}, link, bigSpirit], [], useUnderbar, shrinkFactor);
       case 'person': return toComlexGlyphs([{name: 'from'}, link, {name: 'spirit'}], [], useUnderbar, shrinkFactor);
@@ -166,7 +194,10 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'and':
       case 'yes': return toComlexGlyphs([{name: 'yes'}], [], false, shrinkFactor);
       case 'makes': return toComlexGlyphs([{name: 'make'}], [], false, shrinkFactor);
-      
+      case 'where': return toComlexGlyphs([{name: 'meet'}], [{name: '?'}], true, shrinkFactor);
+      case 'shadow': return toComlexGlyphs([{name: 'light'}], [{name: '?'}], true, shrinkFactor);
+      case 'dark': return toComlexGlyphs([{name: 'light'}], [{name: 'no'}], true, shrinkFactor);
+
       case '?': return toComlexGlyphs([{name: '?'}], [], false, shrinkFactor);
       default: 
         // Attempt to break up
@@ -203,8 +234,9 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'from': return <MOD_From height={scale} width={scale}/>;
       case 'air': return <NOUN_Air height={scale} width={scale}/>;
       case 'down': return <NOUN_Down height={scale} width={scale}/>;
-      case 'earth': return <NOUN_Earth height={scale} width={scale}/>;
       case 'stone':
+      case 'rock':
+      case 'earth': return <NOUN_Earth height={scale} width={scale}/>;
       case 'fire': return <NOUN_Fire height={scale} width={scale}/>;
       case 'gate': return <NOUN_Gate height={scale} width={scale}/>;
       case 'light': return <NOUN_Light height={scale} width={scale}/>;
@@ -218,7 +250,33 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'sound':
       case 'voice': return <NOUN_Voice height={scale} width={scale}/>;
       case 'water': return <NOUN_Water height={scale} width={scale}/>;
-      
+      case 'magic': return <NOUN_Magic height={scale} width={scale}/>;
+      case 'crimson': return <NOUN_Crimson height={scale} width={scale}/>;
+      case 'past': return <NOUN_Past height={scale} width={scale}/>;
+      case 'future': return <NOUN_Future height={scale} width={scale}/>;
+      case 'now': return <NOUN_Now height={scale} width={scale}/>;
+      case 'time': return <NOUN_Time height={scale} width={scale}/>;
+      case 'sword': return <NOUN_Sword height={scale} width={scale}/>;
+      case 'death': return <NOUN_Death height={scale} width={scale}/>;
+      case 'meet': return <NOUN_Meet height={scale} width={scale}/>;
+      case 'day':
+      case 'sun': return <NOUN_Sun height={scale} width={scale}/>;
+      case 'eye': return <NOUN_Eye height={scale} width={scale}/>;
+      case 'blind':
+      case 'surprise': return <NOUN_Surprise height={scale} width={scale}/>;
+      case 'hammer': return <NOUN_Hammer height={scale} width={scale}/>;
+      case 'fly':
+      case 'bird': return <NOUN_Bird height={scale} width={scale}/>;
+      case 'tree': return <NOUN_Tree height={scale} width={scale}/>;
+      case 'house': return <NOUN_House height={scale} width={scale}/>;
+      case 'rase':
+      case 'rise': return <NOUN_Rise height={scale} width={scale}/>;
+      case 'drop':
+      case 'fall': return <NOUN_Fall height={scale} width={scale}/>;
+      case 'shape': return <NOUN_Shape height={scale} width={scale}/>;
+      case 'trap':
+      case 'jail': return <NOUN_Jail height={scale} width={scale}/>;
+
       case '0': return <NUM_Zero height={scale} width={scale}/>;
       case '1': return <NUM_One height={scale} width={scale}/>;
       case '2': return <NUM_Two height={scale} width={scale}/>;

@@ -18,7 +18,7 @@ function Celestial() {
   return (
     <div>
       <h1>Celestial SVG Renderer</h1>
-      <label>Render Script:  <input value={renderScript} onChange={renderScriptChanged}></input></label>
+      <label>Render Script:  <input style={{width:"60%"}} value={renderScript} onChange={renderScriptChanged}></input></label>
       <label>Scale:  <input type="number" value={size} onChange={setSizeChanged}></input></label>
       <div style={{width:"100%", height:"300px", paddingTop: "10px"}}>
         {renderScript && <CelestialSentence renderScript={renderScript} minGlyphWidth={isNaN(parseInt(size)) ? 80 : parseInt(size)}/>}
