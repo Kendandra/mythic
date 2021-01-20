@@ -28,6 +28,11 @@ import NOUN_Story from '../images/celestial/NOUN_Story.svg'
 import NOUN_Up from '../images/celestial/NOUN_Up.svg'
 import NOUN_Voice from '../images/celestial/NOUN_Voice.svg'
 import NOUN_Water from '../images/celestial/NOUN_Water.svg'
+import NUM_Zero from '../images/celestial/NUM_Zero.svg'
+import NUM_One from '../images/celestial/NUM_One.svg'
+import NUM_Two from '../images/celestial/NUM_Two.svg'
+import NUM_Three from '../images/celestial/NUM_Three.svg'
+
 
 interface CelestialSentenceProperties {
   renderScript: string;
@@ -46,6 +51,22 @@ function CelestialSentence(props: CelestialSentenceProperties) {
  
   const minGlpyhWidth = props.minGlyphWidth ?? 40;
   const narrowWidthGlyphInPx = 5;
+
+  function convertToBaseFour(source: Number) : Number[] {
+    // Figure out the number in base 4, the Celestial numbering scheme
+    let convert: Number = source;
+    let digits: Number[] = [];
+    while(true) {
+      let quotent: Number = +convert / 4;
+      let remainder: Number = Math.trunc(+convert % 4);
+      digits.push(remainder);
+      convert = quotent;
+      if(quotent < 1) {
+        break;
+      }
+    } 
+    return digits.reverse();
+  }
 
   function getWidthPx(shrinkFactor: number = 1) : number {
     let shrinkRate = 1
@@ -105,8 +126,17 @@ function CelestialSentence(props: CelestialSentenceProperties) {
     const useUnderbar = !source.includes('*');
     source = source.replace('*', '');
 
+    // Check to see if it's a number, if so, parse it into glyphs.
+    const sourceAsNumber = parseInt(source);
+    if(!isNaN(sourceAsNumber)) {
+      var digits = convertToBaseFour(sourceAsNumber);
+      return toComlexGlyphs(digits.map<ComplexGlyph>(d => {return {name: `${d}`}}), [], useUnderbar, shrinkFactor);
+    }
+
+
     // Common compound glyphs
     const bigSpirit = toComlexGlyphs([{name: 'spirit'}], [{name: 'big'}], true, shrinkFactor+1);
+    const bigEarth = toComlexGlyphs([{name: 'earth'}], [{name: 'big'}], true, shrinkFactor+1);
     const link = {name: '|', baseGlyphNumber: 0, narrowWidthGlyphNumber: 1}
     
     // Translate to (possibly) nested glyphs
@@ -115,6 +145,9 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case '|from': return toComlexGlyphs([link, {name: 'from'}], [], useUnderbar, shrinkFactor);
       case 'of|': return toComlexGlyphs([{name: 'of'}, link], [], useUnderbar, shrinkFactor);
       case '|of': return toComlexGlyphs([link, {name: 'of'}], [], useUnderbar, shrinkFactor);
+
+      case 'mountain': return toComlexGlyphs([{name: 'from'}, link, bigEarth], [], useUnderbar, shrinkFactor);
+
       case 'tell':
       case 'speak':
       case 'say': return toComlexGlyphs([{name: 'voice'}], [], false, shrinkFactor);
@@ -133,6 +166,7 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'and':
       case 'yes': return toComlexGlyphs([{name: 'yes'}], [], false, shrinkFactor);
       case 'makes': return toComlexGlyphs([{name: 'make'}], [], false, shrinkFactor);
+      
       case '?': return toComlexGlyphs([{name: '?'}], [], false, shrinkFactor);
       default: 
         // Attempt to break up
@@ -184,6 +218,11 @@ function CelestialSentence(props: CelestialSentenceProperties) {
       case 'sound':
       case 'voice': return <NOUN_Voice height={scale} width={scale}/>;
       case 'water': return <NOUN_Water height={scale} width={scale}/>;
+      
+      case '0': return <NUM_Zero height={scale} width={scale}/>;
+      case '1': return <NUM_One height={scale} width={scale}/>;
+      case '2': return <NUM_Two height={scale} width={scale}/>;
+      case '3': return <NUM_Three height={scale} width={scale}/>;
 
       case '_': return <LINK_Underbar preserveAspectRatio="none" height="5px" width={"95%"}/>;
       case '|': return <LINK_Verticalbar style={{marginBottom:`${minGlpyhWidth * -0.15}px`}} preserveAspectRatio="none" height={scale} width={"5px"}/>;
